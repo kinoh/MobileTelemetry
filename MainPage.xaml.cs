@@ -1,24 +1,87 @@
-﻿namespace mobiletelemetry;
+﻿using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Core;
+
+namespace mobiletelemetry;
 
 public partial class MainPage : ContentPage
 {
-	int count = 0;
+	private InfluxDBClient _client;
 
 	public MainPage()
 	{
 		InitializeComponent();
+
+		Secrets secrets = new();
+
+		_client = new(
+			secrets.InfluxDBUrl(),
+			secrets.InfluxDBToken(),
+			"kinon",
+			"geo-tracking",
+			new(){
+				{ "device_name", "test" },
+			}
+		);
 	}
 
-	private void OnCounterClicked(object sender, EventArgs e)
+	private async void OnCounterClicked(object sender, EventArgs e)
 	{
-		count++;
+		var result = await GetCurrentLocation();
 
-		if (count == 1)
-			CounterBtn.Text = $"Clicked {count} time";
+		if (result == null)
+		{
+			MessageLabel.Text = "N/A";
+			SemanticScreenReader.Announce("N/A");
+		}
 		else
-			CounterBtn.Text = $"Clicked {count} times";
+		{
+			string s = $"lat={result.Latitude:F6} long={result.Longitude:F6} alt={result.Altitude:F6}";
 
-		SemanticScreenReader.Announce(CounterBtn.Text);
+			MessageLabel.Text = s;
+			SemanticScreenReader.Announce(s);
+
+			Dictionary<string, string> data = new(){
+				{ "lat", result.Latitude.ToString() },
+				{ "long", result.Longitude.ToString() },
+				{ "alt", (result.Altitude ?? 0).ToString() },
+			};
+
+			try
+			{
+				await _client.Send("gps", data);
+			}
+			catch (Exception ex)
+			{
+				NotifyError(ex);
+			}
+		}
+	}
+
+	public async Task<Location?> GetCurrentLocation()
+	{
+		try
+		{
+			TimeSpan timeout = TimeSpan.FromSeconds(10);
+			GeolocationRequest request = new(GeolocationAccuracy.Medium, timeout);
+
+			Location? location = await Geolocation.Default.GetLocationAsync(request);
+
+			if (location != null)
+				return location;
+		}
+		catch (Exception ex)
+		{
+			NotifyError(ex);
+		}
+
+		return null;
+	}
+
+	private async void NotifyError(Exception ex)
+	{
+		string text = $"error: {ex.Message}";
+		await Toast.Make(text, ToastDuration.Short, 14).Show();
+		SemanticScreenReader.Announce(text);
 	}
 }
 
