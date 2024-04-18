@@ -26,6 +26,19 @@ public partial class MainPage : ContentPage
 
 	private async void OnCounterClicked(object sender, EventArgs e)
 	{
+		#if ANDROID
+			if (!AndroidX.Core.App.NotificationManagerCompat.From(Platform.CurrentActivity).AreNotificationsEnabled())
+			{
+				await Toast.Make("notification unavailable", ToastDuration.Short, 14).Show();
+				return;
+			}
+
+			Android.Content.Intent intent = new(Android.App.Application.Context, typeof(TelemetryService));
+			Android.App.Application.Context.StartForegroundService(intent);
+			await Toast.Make("foreground service started", ToastDuration.Short, 14).Show();
+		#endif
+		return;
+
 		var result = await GetCurrentLocation();
 
 		if (result == null)
