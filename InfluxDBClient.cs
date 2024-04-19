@@ -9,7 +9,7 @@ public class InfluxDBClient(string BaseUrl, string Token, string Org, string Buc
     public ReadOnlyDictionary<string, string> Tags { get; } = tags.AsReadOnly();
 
     HttpClient _client = new();
-    string _tagsString = string.Join(",", tags.Select(pair => $"{pair.Key}={pair.Value}"));
+    string _tagsString = string.Join(",", tags.Select(pair => $"{Escape(pair.Key)}={Escape(pair.Value)}"));
 
     public async Task<string> Send(string measurement, Dictionary<string,string> data)
     {
@@ -39,5 +39,14 @@ public class InfluxDBClient(string BaseUrl, string Token, string Org, string Buc
         response.EnsureSuccessStatusCode();
 
         return await response.Content.ReadAsStringAsync();
+    }
+
+    // cf. https://docs.influxdata.com/influxdb/cloud/reference/syntax/line-protocol/
+    private static string Escape(string text)
+    {
+        return text
+            .Replace(",", "\\,")
+            .Replace("=", "\\=")
+            .Replace(" ", "\\ ");
     }
 }
