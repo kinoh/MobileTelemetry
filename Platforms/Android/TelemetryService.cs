@@ -1,12 +1,13 @@
 using Android.App;
 using Android.Content;
+using Android.Content.PM;
 using Android.OS;
 using Android.Runtime;
 using AndroidX.Core.App;
 
 namespace mobiletelemetry;
 
-[Service]
+[Service(ForegroundServiceType = ForegroundService.TypeLocation)]
 public class TelemetryService : Service
 {
     private string NOTIFICATION_CHANNEL_ID = "7224141";
@@ -28,7 +29,7 @@ public class TelemetryService : Service
         notification.SetSmallIcon(Resource.Mipmap.appicon);
         notification.SetContentTitle("ForegroundService");
         notification.SetContentText("Foreground Service is running");
-        StartForeground(NOTIFICATION_ID, notification.Build());
+        StartForeground(NOTIFICATION_ID, notification.Build(), ForegroundService.TypeLocation);
     }
 
     private void CreateNotificationChannel(NotificationManager notificationMnaManager)
