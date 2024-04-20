@@ -23,10 +23,12 @@ public class TelemetryService : Service, IRecipient<LogRequestMessage>
     {
         var notifcationManager = GetSystemService(Context.NotificationService) as NotificationManager;
 
-        if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
+        if (notifcationManager == null)
         {
-            CreateNotificationChannel(notifcationManager);
+            throw new Exception("notification manager not found");
         }
+
+        CreateNotificationChannel(notifcationManager);
 
         var notification = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
         notification.SetAutoCancel(false);
@@ -46,6 +48,7 @@ public class TelemetryService : Service, IRecipient<LogRequestMessage>
 
     public override IBinder OnBind(Intent? intent)
     {
+        #pragma warning disable CS8603
         return null;
     }
 
