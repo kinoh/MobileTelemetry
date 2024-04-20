@@ -11,18 +11,25 @@ public partial class MainPage : ContentPage
 		InitializeComponent();
 	}
 
-	private async void OnCounterClicked(object sender, EventArgs e)
+	private void OnCounterClicked(object sender, EventArgs e)
 	{
 		#if ANDROID
-			if (!AndroidX.Core.App.NotificationManagerCompat.From(Platform.CurrentActivity).AreNotificationsEnabled())
+			Android.Content.Context? context = Platform.CurrentActivity;
+			if (context == null)
 			{
-				await Toast.Make("notification unavailable", ToastDuration.Short, 14).Show();
+				Toast.Make("no activity found", ToastDuration.Short, 14).Show();
+				return;
+			}
+
+			if (!AndroidX.Core.App.NotificationManagerCompat.From(context).AreNotificationsEnabled())
+			{
+				Toast.Make("notification unavailable", ToastDuration.Short, 14).Show();
 				return;
 			}
 
 			Android.Content.Intent intent = new(Android.App.Application.Context, typeof(TelemetryService));
 			Android.App.Application.Context.StartForegroundService(intent);
-			await Toast.Make("foreground service started", ToastDuration.Short, 14).Show();
+			Toast.Make("foreground service started", ToastDuration.Short, 14).Show();
 		#endif
 	}
 
