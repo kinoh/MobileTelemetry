@@ -4,6 +4,7 @@ using Android.Content.PM;
 using Android.OS;
 using Android.Runtime;
 using AndroidX.Core.App;
+using CommunityToolkit.Mvvm.Messaging;
 
 namespace mobiletelemetry;
 
@@ -13,8 +14,10 @@ public class TelemetryService : Service, IRecipient<LogRequestMessage>
     private string NOTIFICATION_CHANNEL_ID = "7224141";
     private int NOTIFICATION_ID = 1;
     private string NOTIFICATION_CHANNEL_NAME = "notification";
+    private const int MaxLogCount = 1000;
 
     private DateTime? lastTick = null;
+    private List<string> logs = new();
 
     private void StartForegroundService()
     {
@@ -81,6 +84,13 @@ public class TelemetryService : Service, IRecipient<LogRequestMessage>
                 lastTick = now;
 
                 string status = await Tick(client);
+
+                string timestamp = now.ToString("o", System.Globalization.CultureInfo.InvariantCulture);
+                logs.Add($"[{timestamp}] {status}");
+                if (logs.Count > MaxLogCount)
+                {
+                    logs.RemoveAt(0);
+                }
 
                 var notification = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
                 notification.SetAutoCancel(false);

@@ -22,6 +22,12 @@
                 SemanticProperties.Hint="Click me"
                 Clicked="OnCounterClicked"
                 HorizontalOptions="Fill" />
+
+            <Button
+                Text="Get logs" 
+                SemanticProperties.Hint="Get logs"
+                Clicked="OnGetLogsClicked"
+                HorizontalOptions="Fill" />
         </VerticalStackLayout>
     </ScrollView>
 
