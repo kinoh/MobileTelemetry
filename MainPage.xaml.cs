@@ -33,7 +33,7 @@ public partial class MainPage : ContentPage
 		#endif
 	}
 
-	private async void OnGetLogsClicked(object sender, EventArgs e)
+	private void OnGetLogsClicked(object sender, EventArgs e)
 	{
 		LogRequestMessage logs = WeakReferenceMessenger.Default.Send<LogRequestMessage>();
 
