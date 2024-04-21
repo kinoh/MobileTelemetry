@@ -11,7 +11,7 @@ public partial class MainPage : ContentPage
 		InitializeComponent();
 	}
 
-	private void OnCounterClicked(object sender, EventArgs e)
+	private void OnStartServiceClicked(object sender, EventArgs e)
 	{
 		#if ANDROID
 			Android.Content.Context? context = Platform.CurrentActivity;
@@ -43,7 +43,7 @@ public partial class MainPage : ContentPage
 		}
 		else
 		{
-			await Toast.Make("no response", ToastDuration.Short, 14).Show();
+			MessageLabel.Text = "no response";
 		}
 	}
 

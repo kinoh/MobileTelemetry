@@ -33,7 +33,7 @@ public class TelemetryService : Service, IRecipient<LogRequestMessage>
         var notification = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
         notification.SetAutoCancel(false);
         notification.SetOngoing(true);
-        notification.SetSmallIcon(Resource.Mipmap.appicon);
+        notification.SetSmallIcon(Resource.Drawable.AppIcon);
         notification.SetContentTitle("Running");
         notification.SetContentText("Telemetry Service is running");
         StartForeground(NOTIFICATION_ID, notification.Build(), ForegroundService.TypeLocation);
@@ -98,7 +98,7 @@ public class TelemetryService : Service, IRecipient<LogRequestMessage>
                 var notification = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
                 notification.SetAutoCancel(false);
                 notification.SetOngoing(true);
-                notification.SetSmallIcon(Resource.Mipmap.appicon);
+                notification.SetSmallIcon(Resource.Drawable.AppIcon);
                 notification.SetContentTitle("Status");
                 notification.SetContentText(status);
 
