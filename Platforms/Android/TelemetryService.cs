@@ -86,7 +86,10 @@ public class TelemetryService : Service, IRecipient<LogRequestMessage>
                 }
                 lastTick = now;
 
-                string status = await Tick(client);
+                string status = string.Join(" ", new[]{
+                    await TickGps(client),
+                    await TickLight(client),
+                });
 
                 string timestamp = now.ToString("o", System.Globalization.CultureInfo.InvariantCulture);
                 logs.Add($"[{timestamp}] {status}");
@@ -110,7 +113,7 @@ public class TelemetryService : Service, IRecipient<LogRequestMessage>
         return StartCommandResult.Sticky;
     }
 
-    private async Task<string> Tick(InfluxDBClient client)
+    private async Task<string> TickGps(InfluxDBClient client)
     {
         TimeSpan timeout = TimeSpan.FromSeconds(10);
         GeolocationRequest request = new(GeolocationAccuracy.Medium, timeout);
@@ -129,6 +132,31 @@ public class TelemetryService : Service, IRecipient<LogRequestMessage>
         try
         {
             await client.Send("gps", data);
+        }
+        catch (Exception ex)
+        {
+            return $"error: {ex.Message}";
+        }
+
+        return string.Join(" ", data.Select(pair => pair.Value));
+    }
+
+    private async Task<string> TickLight(InfluxDBClient client)
+    {
+		SensorValueRequestMessage message = WeakReferenceMessenger.Default.Send<SensorValueRequestMessage>();
+
+		if (!message.HasReceivedResponse)
+        {
+            return "no response";
+        }
+
+        Dictionary<string, string> data = new(){
+            { "light", message.Response.ToString() },
+        };
+
+        try
+        {
+            await client.Send("light", data);
         }
         catch (Exception ex)
         {
